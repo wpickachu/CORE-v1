@@ -1,8 +1,14 @@
 pragma solidity 0.6.12;
 
 import "./IFeeApprover.sol";
+import "./ICoreVault.sol";
+import "./IWETH9.sol";
+import "./uniswapv2/libraries/UniswapV2Library.sol";
+import "./uniswapv2/libraries/Math.sol";
 
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
 contract COREv1Router is OwnableUpgradeSafe {
     using SafeMath for uint256;

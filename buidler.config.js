@@ -1,5 +1,5 @@
 usePlugin("@nomiclabs/buidler-truffle5");
-usePlugin('buidler-log-remover');
+usePlugin("buidler-log-remover");
 
 module.exports = {
   solc: {
@@ -11,10 +11,16 @@ module.exports = {
       settings: {
         optimizer: {
           enabled: true,
-          runs: 200
+          runs: 200,
         },
-        evmVersion: "byzantium"
-       }
+        evmVersion: "byzantium",
+      },
     },
-  }
+  },
+  paths: {
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts",
+  },
 };
