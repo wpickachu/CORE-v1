@@ -19,6 +19,7 @@ module.exports = {
   },
   paths: {
     sources: "./contracts",
+    proxy: './Proxy',
     tests: "./test",
     cache: "./cache",
     artifacts: "./artifacts",

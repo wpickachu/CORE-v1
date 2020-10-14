@@ -1,13 +1,17 @@
 const { ethers, Wallet, ContractFactory, Provider } = require("ethers");
+
 const fs = require('fs');
 
+require("dotenv").config();
 const unpackArtifact = (artifactPath) => {
     let contractData = JSON.parse(fs.readFileSync(artifactPath))
+    
     const contractBytecode = contractData['bytecode']
     const contractABI = contractData['abi']
     const constructorArgs = contractABI.filter((itm) => {
         return itm.type == 'constructor'
     })
+
     let constructorStr;
     if(constructorArgs.length < 1) {
         constructorStr = "    -- No constructor arguments -- "
@@ -77,21 +81,23 @@ const deployCOREToken = async (mnemonic = "", mainnet = false) => {
         uniswapRouterAddress,
         uniswapFactoryAddress
     ]
+
+    let wallet, connectedWallet;
+
     if(mnemonic != "") {
-        const wallet = Wallet.fromMnemonic(mnemonic);
-        const connectedWallet = wallet.connect(provider);
+        wallet = Wallet.fromMnemonic(mnemonic);
+        connectedWallet = wallet.connect(provider);
     }
     else {
         deployTokenFromSigner(tokenUnpacked.abi, tokenUnpacked.bytecode, provider, tokenArgs)
     }
-    return;
 
     // using soft mnemonic
     const token = await deployContract(tokenUnpacked.abi, tokenUnpacked.bytecode, wallet, provider, tokenArgs)
-    console.log(`⌛ Deploying token...`)
+    console.log(`⌛ Deploying core token...`)
     await connectedWallet.provider.waitForTransaction(token.deployTransaction.hash)
     console.log(`✅ Deployed token to ${token.address}`)
-    return
+    return;
     console.log(`⌛ calling createUniswapPairMainnet...`)
     let tx = await token.createUniswapPairMainnet();
     console.log(`⌛ createUniswapPairMainnet...`)
@@ -133,5 +139,5 @@ const deployCoreVault = (coreTokenAddress = "0x62359ed7505efc61ff1d56fef82158cca
 }
 
 
-// deployCOREToken();
-deployCoreVault();
+deployCOREToken(process.env.MNEMONIC);
+// deployCoreVault();

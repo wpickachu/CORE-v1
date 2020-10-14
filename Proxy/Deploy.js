@@ -1,13 +1,23 @@
 const { ethers, Wallet, ContractFactory, Provider } = require("ethers");
+
 const fs = require('fs');
+
+require("dotenv").config();
+
+const deployContract = async (contractABI, contractBytecode, wallet, provider, args = []) => {
+    const factory = new ContractFactory(contractABI, contractBytecode, wallet.connect(provider))
+    return await factory.deploy(...args);
+}
 
 const unpackArtifact = (artifactPath) => {
     let contractData = JSON.parse(fs.readFileSync(artifactPath))
+
     const contractBytecode = contractData['bytecode']
     const contractABI = contractData['abi']
     const constructorArgs = contractABI.filter((itm) => {
         return itm.type == 'constructor'
     })
+
     let constructorStr;
     if(constructorArgs.length < 1) {
         constructorStr = "    -- No constructor arguments -- "
@@ -21,6 +31,7 @@ const unpackArtifact = (artifactPath) => {
             }
         }))
     }
+
     return {
         abi: contractABI,
         bytecode: contractBytecode,
@@ -31,12 +42,14 @@ const unpackArtifact = (artifactPath) => {
 const logDeployTx = (contractABI, contractBytecode, args = []) => {
     const factory = new ContractFactory(contractABI, contractBytecode)
     let deployTx;
+
     if(args.length === 0) {
         deployTx = factory.getDeployTransaction()
     }
     else {
         deployTx = factory.getDeployTransaction(...args)
     }
+
     console.log(deployTx)
 }
 
@@ -47,22 +60,58 @@ const getContractDeploymentTxFor = async (artifactPath, args) => {
     logDeployTx(contractUnpacked.abi, contractUnpacked.bytecode, args)
 }
 
+const deployToken = async (token, mnemonic = "", mainnet = false) => {
+    // Get the built metadata for our contracts
+    let tokenUnpacked = unpackArtifact(token)
+    console.log(tokenUnpacked.description)
 
+    let provider;
+    const uniswapFactoryAddress = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
+    const uniswapRouterAddress = "0x7a250d5630b4cf539739df2c5dacb4c659f2488d";
+
+    if(mainnet) {
+        provider = ethers.getDefaultProvider("homestead")
+        wethAddress = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+    }
+    else {
+        provider = ethers.getDefaultProvider("kovan")
+        wethAddress = "0xd0a1e359811322d97991e03f863a0c30c2cf029c"
+    }
+
+    const tokenArgs = [
+        uniswapRouterAddress,
+        uniswapFactoryAddress
+    ]
+
+    let wallet, connectedWallet;
+
+    if(mnemonic != "") {
+        wallet = Wallet.fromMnemonic(mnemonic);
+        connectedWallet = wallet.connect(provider);
+    }
+    else {
+        deployTokenFromSigner(tokenUnpacked.abi, tokenUnpacked.bytecode, provider, tokenArgs)
+    }
+
+    // using soft mnemonic
+    const token = await deployContract(tokenUnpacked.abi, tokenUnpacked.bytecode, wallet, provider, tokenArgs)
+    console.log(`⌛ Deploying core token...`)
+    await connectedWallet.provider.waitForTransaction(token.deployTransaction.hash)
+    console.log(`✅ Deployed token to ${token.address}`)
+}
 
 // fill out data for steps as you go
-let deployedProxyAdminAddress = "0x9cb1eeccd165090a4a091209e8c3a353954b1f0f";
-let deployedCoreVaultAddress = "0xd0ea2a4771e7ce09f2cc02d69ebf9d41a85cf161";
-let deployedProxy = "0xc5cacb708425961594b63ec171f4df27a9c0d8c9";
-let deployedFeeApprover = "0x1d0db0a5f9f8cf5b69f804d556176c6bc9186587";
-// let deployedProxyAdminAddress = "0x08f4aa2e28d4319059a4d5153388c6bf9feccabe"
-// let deployedCoreVaultAddress = "0x866c25e8c18c6f2824452163fc8f99f8a1da04ef"
-// let deployedProxy = "0xac6bb145d749fd867d383c5779f6adae0a12c291"
-let coreTokenAddress = "0x62359ed7505efc61ff1d56fef82158ccaffa23d7"
-let devAddr = "0x5A16552f59ea34E44ec81E58b3817833E9fD5436"
+let deployedProxyAdminAddress = "";
+let deployedCoreVaultAddress = "";
+let deployedProxy = "";
+let deployedFeeApprover = "";
+let coreTokenAddress = "0x13F15b86e671903e304b0e9773Ea2b15Dbfd0a5c";
+let devAddr = "0xAD3e6614754f143a6e602E81086F1dB7afC81569";
 
 // Step 1.
 // Deploy proxy admin contract and get the address..
 if(!deployedProxyAdminAddress) {
+    deployContract("./prodartifacts/ProxyAdmin.json");
     getContractDeploymentTxFor(
         "./prodartifacts/ProxyAdmin.json"
     );
@@ -72,6 +121,7 @@ if(!deployedProxyAdminAddress) {
 // Step 2.
 // Deploy the CoreVault logic
 if(!deployedCoreVaultAddress) {
+    deployContract("./prodartifacts/CoreVault.json");
     getContractDeploymentTxFor(
         "./prodartifacts/CoreVault.json"
     )
