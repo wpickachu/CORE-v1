@@ -95,7 +95,7 @@ const getContractDeploymentTxFor = async (artifactPath, args) => {
 // fill out data for steps as you go
 let deployedProxyAdminAddress = "0xa8c5F3D1D010Be2CcaC57e32bCCa5676EA237D39";
 let deployedCoreVaultAddress = "0xAE125303E5a1f142bDF2A3048C4CDCf075d864E1";
-let deployedCoreVaultProxy = "";
+let deployedCoreVaultProxy = "0x1aDfC567438707A80b8bCF689D6195Df260c71F7";
 let deployedFeeApprover = "";
 let coreTokenAddress = "0x80aCE96aB5a40F110c9477460c77004CA16669a2";
 let devAddr = "0x5518876726C060b2D3fCda75c0B9f31F13b78D07";

@@ -14903,7 +14903,7 @@
   },
   "networks": {},
   "schemaVersion": "3.2.5",
-  "updatedAt": "2020-10-14T18:25:52.760Z",
+  "updatedAt": "2020-10-14T19:59:35.557Z",
   "devdoc": {
     "details": "This contract is the admin of a proxy, and is in charge of upgrading it as well as transferring it to another admin.",
     "methods": {
