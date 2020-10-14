@@ -60,9 +60,9 @@ const getContractDeploymentTxFor = async (artifactPath, args) => {
     logDeployTx(contractUnpacked.abi, contractUnpacked.bytecode, args)
 }
 
-const deployToken = async (token, mnemonic = "", mainnet = false) => {
+const deployToken = async (tokenArtifact = "", mnemonic = "", mainnet = false) => {
     // Get the built metadata for our contracts
-    let tokenUnpacked = unpackArtifact(token)
+    let tokenUnpacked = unpackArtifact(tokenArtifact)
     console.log(tokenUnpacked.description)
 
     let provider;
@@ -102,16 +102,16 @@ const deployToken = async (token, mnemonic = "", mainnet = false) => {
 
 // fill out data for steps as you go
 let deployedProxyAdminAddress = "";
-let deployedCoreVaultAddress = "";
-let deployedProxy = "";
-let deployedFeeApprover = "";
+let deployedCoreVaultAddress = "N";
+let deployedProxy = "N";
+let deployedFeeApprover = "N";
 let coreTokenAddress = "0x13F15b86e671903e304b0e9773Ea2b15Dbfd0a5c";
 let devAddr = "0xAD3e6614754f143a6e602E81086F1dB7afC81569";
 
 // Step 1.
 // Deploy proxy admin contract and get the address..
 if(!deployedProxyAdminAddress) {
-    deployContract("./prodartifacts/ProxyAdmin.json");
+    deployToken("./prodartifacts/ProxyAdmin.json", process.env.MNEMONIC);
     getContractDeploymentTxFor(
         "./prodartifacts/ProxyAdmin.json"
     );
@@ -121,9 +121,9 @@ if(!deployedProxyAdminAddress) {
 // Step 2.
 // Deploy the CoreVault logic
 if(!deployedCoreVaultAddress) {
-    deployContract("./prodartifacts/CoreVault.json");
+    // deployContract("./prodartifacts/CoreVault.json", process.env.MNEMONIC);
     getContractDeploymentTxFor(
-        "./prodartifacts/CoreVault.json"
+        "../prodartifacts/CoreVault.json"
     )
     return;
 }
