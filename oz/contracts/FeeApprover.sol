@@ -439,6 +439,8 @@ interface IUniswapV2Factory {
 
 // File: contracts/FeeApprover.sol
 
+// SPDX-License-Identifier: MIT
+
 pragma solidity ^0.6.0;
 
 
@@ -457,7 +459,10 @@ contract FeeApprover is OwnableUpgradeSafe {
         OwnableUpgradeSafe.__Ownable_init();
         coreTokenAddress = _COREAddress;
         WETHAddress = _WETHAddress;
-        tokenUniswapPair = IUniswapV2Factory(_uniswapFactory).getPair(WETHAddress,coreTokenAddress);
+        tokenUniswapPair = IUniswapV2Factory(_uniswapFactory).getPair(
+            WETHAddress,
+            coreTokenAddress
+        );
         feePercentX100 = 10;
         paused = true; // We start paused until sync post LGE happens.
     }
@@ -467,11 +472,11 @@ contract FeeApprover is OwnableUpgradeSafe {
     address internal WETHAddress;
     address coreTokenAddress;
     address coreVaultAddress;
-    uint8 public feePercentX100;  // max 255 = 25.5% artificial clamp
+    uint8 public feePercentX100; // max 255 = 25.5% artificial clamp
     uint256 public lastTotalSupplyOfLPTokens;
     bool paused;
 
-    // CORE token is pausable 
+    // CORE token is pausable
     function setPaused(bool _pause) public onlyOwner {
         paused = _pause;
     }
@@ -489,40 +494,46 @@ contract FeeApprover is OwnableUpgradeSafe {
         lastTotalSupplyOfLPTokens = _LPSupplyOfPairTotal;
     }
 
-    function calculateAmountsAfterFee(        
-        address sender, 
+    function calculateAmountsAfterFee(
+        address sender,
         address recipient, // unusued maybe use din future
         uint256 amount
-        ) public  returns (uint256 transferToAmount, uint256 transferToFeeDistributorAmount) 
-        {
-            require(paused == false, "FEE APPROVER: Transfers Paused");
-            uint256 _LPSupplyOfPairTotal = IERC20(tokenUniswapPair).totalSupply();
+    )
+        public
+        returns (
+            uint256 transferToAmount,
+            uint256 transferToFeeDistributorAmount
+        )
+    {
+        require(paused == false, "FEE APPROVER: Transfers Paused");
+        uint256 _LPSupplyOfPairTotal = IERC20(tokenUniswapPair).totalSupply();
 
+        //
+        //
 
-            //
-            //
+        //
+        //
 
-            //
-            //
+        if (sender == tokenUniswapPair)
+            require(
+                lastTotalSupplyOfLPTokens <= _LPSupplyOfPairTotal,
+                "Liquidity withdrawals forbidden"
+            );
 
-            if(sender == tokenUniswapPair) 
-                require(lastTotalSupplyOfLPTokens <= _LPSupplyOfPairTotal, "Liquidity withdrawals forbidden");
-            
-            //
-            //
+        //
+        //
 
-            if(sender == coreVaultAddress  || sender == tokenUniswapPair ) { // Dont have a fee when corevault is sending, or infinite loop                       // And when pair is sending ( buys are happening, no tax on it)
-                transferToFeeDistributorAmount = 0;
-                transferToAmount = amount;
-            } 
-            else {
-                transferToFeeDistributorAmount = amount.mul(feePercentX100).div(1000);
-                transferToAmount = amount.sub(transferToFeeDistributorAmount);
-            }
-
-
-           lastTotalSupplyOfLPTokens = _LPSupplyOfPairTotal;
+        if (sender == coreVaultAddress || sender == tokenUniswapPair) {
+            // Dont have a fee when corevault is sending, or infinite loop                       // And when pair is sending ( buys are happening, no tax on it)
+            transferToFeeDistributorAmount = 0;
+            transferToAmount = amount;
+        } else {
+            transferToFeeDistributorAmount = amount.mul(feePercentX100).div(
+                1000
+            );
+            transferToAmount = amount.sub(transferToFeeDistributorAmount);
         }
 
-
+        lastTotalSupplyOfLPTokens = _LPSupplyOfPairTotal;
+    }
 }

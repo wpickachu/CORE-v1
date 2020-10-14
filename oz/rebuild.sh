@@ -17,11 +17,11 @@ cp -R contracts contracts.orig
 echo 'Removing log lines...'
 yarn run buidler remove-logs
 echo 'flattening CORE...'
-npx truffle-flattener contracts/CORE.sol >> oz/contracts/CORE.sol
+npx truffle-flattener contracts/CORE.sol | awk '/SPDX-License-Identifier/&&c++>0 {next} 1' | awk '/pragma experimental ABIEncoderV2;/&&c++>0 {next} 1' >> oz/contracts/CORE.sol
 echo 'flattening CoreVault...'
-npx truffle-flattener contracts/CoreVault.sol >> oz/contracts/CoreVault.sol
+npx truffle-flattener contracts/CoreVault.sol | awk '/SPDX-License-Identifier/&&c++>0 {next} 1' | awk '/pragma experimental ABIEncoderV2;/&&c++>0 {next} 1' >> oz/contracts/CoreVault.sol
 echo 'flattening FeeApprover...'
-npx truffle-flattener contracts/FeeApprover.sol >> oz/contracts/FeeApprover.sol
+npx truffle-flattener contracts/FeeApprover.sol | awk '/SPDX-License-Identifier/&&c++>0 {next} 1' | awk '/pragma experimental ABIEncoderV2;/&&c++>0 {next} 1' >> oz/contracts/FeeApprover.sol
 echo 'Removing contracts without logs...'
 rm -rf contracts
 echo 'Putting original contracts back...'

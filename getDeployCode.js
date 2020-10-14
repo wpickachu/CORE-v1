@@ -54,15 +54,17 @@ const deployContract = async (contractABI, contractBytecode, wallet, provider, a
 const deployCOREToken = async (mnemonic = "", mainnet = false) => {
 
     // Get the built metadata for our contracts
-    let tokenUnpacked = unpackArtifact("./artifacts/CORE.json")
+    let tokenUnpacked = unpackArtifact("./oz/build/contracts/CORE.json");
     console.log(tokenUnpacked.description)
     // let chefUnpacked = unpackArtifact("./artifacts/MasterChef.json")
     let feeApproverUnpacked = unpackArtifact("./artifacts/FeeApprover.json")
 
     let provider;
     let wethAddress;
-    const uniswapFactoryAddress = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
+
     const uniswapRouterAddress = "0x7a250d5630b4cf539739df2c5dacb4c659f2488d";
+    const uniswapFactoryAddress = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
+
     if(mainnet) {
         provider = ethers.getDefaultProvider("homestead")
         wethAddress = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
@@ -89,6 +91,7 @@ const deployCOREToken = async (mnemonic = "", mainnet = false) => {
         connectedWallet = wallet.connect(provider);
     }
     else {
+        console.log("00---------------");
         deployTokenFromSigner(tokenUnpacked.abi, tokenUnpacked.bytecode, provider, tokenArgs)
     }
 
