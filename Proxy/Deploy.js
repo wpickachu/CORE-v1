@@ -1,3 +1,5 @@
+require("openzeppelin-test-helpers");
+
 const { ethers, Wallet, ContractFactory } = require("ethers");
 const fs = require("fs");
 
@@ -39,14 +41,17 @@ const logDeployTx = (contractABI, contractBytecode, args = []) => {
   }
   console.log(deployTx);
 };
+
 let mainnet = false;
 let provider;
 let wethAddress;
 let wallet, connectedWallet;
 let mnemonic =
   "trigger short carbon offer combine camera shiver roast salmon unit another damp";
+
 const uniswapFactoryAddress = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
 const uniswapRouterAddress = "0x7a250d5630b4cf539739df2c5dacb4c659f2488d";
+
 if (mainnet) {
   provider = ethers.getDefaultProvider("homestead");
   wethAddress = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
@@ -132,6 +137,9 @@ if (!deployedCoreVaultProxy) {
 
 // Step 4.
 // Call initializer on the proxied CoreVault
+
+const ERC20RupiahToken = artifacts.require("CoreVault");
+await this.corevault.initialize(deployedCoreVaultAddress, dev, clean5);
 
 // Step 5.
 // Release FeeApprover
